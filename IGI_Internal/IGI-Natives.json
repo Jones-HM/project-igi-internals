@@ -695,6 +695,15 @@
 		},
 		{
 			"Native": {
+				"hash": "00416D80",
+				"address": 4287872,
+				"name": "EnablePlayerHit",
+				"signature": "int EnablePlayerHit()",
+				"note": "Set (0057BABC + 0xE1) value to 0 for Enable, 1 for Disable"
+			}
+		},
+		{
+			"Native": {
 				"hash": "0045C440",
 				"address": 4572224,
 				"name": "SoldierExecute",
