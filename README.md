@@ -9,11 +9,11 @@ So don't use this project to misuse the game's identity and source of original g
 - [DLL File](https://en.wikipedia.org/wiki/Dynamic-link_library) - This project is DLL file rather than standard application.</br>
 - [DLL Injection](https://en.wikipedia.org/wiki/DLL_injection) - This project needs DLL injection into _IGI_ game.</br>
 - [Hooking](https://en.wikipedia.org/wiki/Hooking) - This project uses [Minhook](https://github.com/TsudaKageyu/minhook) for API calls.</br>
-- [GTLibc](https://github.com/haseeb-heaven/GTLibc) -C/C++ library for interactig with Game.</br>
-- [Pattern Scanning](https://memoryhackers.org/konular/external-internal-pattern-scanning-guide.95460/) - This project use pattern memory scanning to check Game/Player is loaded properly.</br>
+- [GTLibc](https://github.com/Jones-HM/GTLibCpp) -C/C++ library for interactig with Game.</br>
+- [Pattern Scanning](https://github.com/GH-Rake/PatternScan) - This project use pattern memory scanning to check Game/Player is loaded properly.</br>
 - **Game specific section.**
-- [IGI Graphs Structure](https://github.com/IGI-Research-Devs/IGI-Research-Data/blob/main/Research/GRAPH/Graph-Structure.txt) - Project IGI 1 Graph structure data.
-- [IGI 3D Models](https://github.com/IGI-Research-Devs/IGI-Research-Data/blob/main/Research/Natives/IGI-Models.txt) - Project IGI uses 3D models in 
+- [IGI Graphs Structure](https://github.com/Jones-HM/project-igi-research-data/blob/main/Research/GRAPH/Graph-Structure.md) - Project IGI 1 Graph structure data.
+- [IGI 3D Models](https://github.com/Jones-HM/project-igi-research-data/blob/main/Research/Natives/IGI-Models.json) - Project IGI uses 3D models in 
 form of _MEF_ (**M**esh **E**xternal **F**ile).
 - [IGI Camera View](https://www.researchgate.net/figure/Definition-of-pitch-roll-and-yaw-angle-for-camera-state-estimation_fig15_273225757) - IGI use game Camera called [Viewport](https://en.wikipedia.org/wiki/Viewport) to display the game updates.
 - **Native section.**
