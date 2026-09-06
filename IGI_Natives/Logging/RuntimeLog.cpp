@@ -104,6 +104,17 @@ bool IsOwnLog(const std::string& path) {
   return path.find("IGI-Natives") != std::string::npos;
 }
 
+// Raw writer that ignores the enabled flag; used to record toggle transitions
+// into the trace file even while capture is disabled.
+void EmitRaw(const std::string& line) {
+  std::lock_guard<std::mutex> lock(g_traceMutex);
+  EnsureStream();
+  if (g_traceStream.is_open()) {
+    g_traceStream << line << "\n";
+    g_traceStream.flush();
+  }
+}
+
 } // namespace
 
 // ---------------------------------------------------------------------------
@@ -127,6 +138,19 @@ void RuntimeLogShutdown() {
     g_traceStream.close();
   }
   g_initialized = false;
+}
+
+const string RuntimeLogFilePath() {
+  return g_Utility.GetModuleFolder() + "\\" + kRuntimeLogFileName;
+}
+
+bool RuntimeLogSetEnabled(bool enable) {
+  const bool previous = g_RuntimeLogEnabled.exchange(enable);
+  if (previous != enable) {
+    EmitRaw(enable ? "=== capture ENABLED (hotkey) ==="
+                   : "=== capture DISABLED (hotkey) ===");
+  }
+  return enable;
 }
 
 // ---------------------------------------------------------------------------

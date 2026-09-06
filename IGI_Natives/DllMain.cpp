@@ -117,6 +117,7 @@ BOOL WINAPI DllMain(HMODULE hModule, DWORD dwReason, LPVOID) {
       RuntimeLogReadConfig();
       LOG_WARNING("Runtime logging %s.",
                   g_RuntimeLogEnabled.load() ? "enabled" : "disabled");
+      LOG_WARNING("Runtime log file: %s", RuntimeLogFilePath().c_str());
 
       native_instance = std::make_unique<Natives>();
       LOG_WARNING("Natives initialized.");

@@ -1,6 +1,7 @@
 #include "Features.hpp"
 #include "CommonConst.hpp"
 #include "Libs/GTLibc.hpp"
+#include "Logging/RuntimeLog.hpp"
 #include "Natives/NativeHelper.hpp"
 #include "Utils/FiberPool.hpp"
 #include "Utils/Utility.hpp"
@@ -42,6 +43,27 @@ void DllMainLoop() {
       LOG_INFO("Weapon structure loaded at 0x%x", READ_PTR(gun_pickup_ptr));
 
     g_level_changed ^= 1;
+  }
+
+  // ── Retail runtime-logging toggle: Ctrl+L ─────────────────────────────
+  // Works at the main menu and in-game. Edge-detected so holding the keys
+  // toggles capture exactly once. Feedback lands on the game HUD and in
+  // IGI-Natives.log; the trace file itself records the transition too.
+  {
+    static bool s_prev_ctrl_l = false;
+    const bool ctrl_l =
+        g_Utility.IsKeyPressed(VK_CONTROL) && g_Utility.IsKeyPressed('L');
+    if (ctrl_l && !s_prev_ctrl_l) {
+      const bool enabled = RuntimeLogSetEnabled(!g_RuntimeLogEnabled.load());
+      const string state = enabled ? "ON" : "OFF";
+      LOG_INFO("Ctrl+L: Retail runtime logging %s -> %s", state.c_str(),
+               RuntimeLogFilePath().c_str());
+      const string message = "Runtime Log " + state;
+      FiberPool::Instance().RunExternal([message] {
+        MISC::STATUS_MESSAGE_SHOW(message);
+      }, 10);
+    }
+    s_prev_ctrl_l = ctrl_l;
   }
 
   if (QueueFreeCamStep()) return;

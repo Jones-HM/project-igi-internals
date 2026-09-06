@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Retail `fopen` wrapper `GameOpenFile` at `0x004A5350` and Q-script reader `GameOpenQFile` at `0x004B1510` (existing detours enabled).
   - Win32 APIs `OutputDebugStringA`, `CreateFileA` and `WriteFile` (IAT-safe API hooks).
 - All captured traffic is written to `<game folder>\IGI-Natives-runtime.log` with a 200-line/second rate limiter, a handle→path attribution map for `WriteFile`, and console echo for the rare textual debug outputs.
+- `Ctrl+L` hotkey to toggle capture ON/OFF at any time (edge-detected, works in menus and in-game); the game HUD shows the state and the trace file records the transition.
+- The startup log prints the full trace-file path; `RuntimeLogFilePath()` exposes it for other modules.
 - `RuntimeLogGuard` thread-local re-entrancy guard so the I/O hooks never trace the DLL's own file/console activity.
 - Runtime toggles without rebuilding: `IGI_RUNTIME_LOG=0` disables capturing, `IGI_RUNTIME_LOG_VERBOSE=1` adds text/hex previews for CRT-write and WriteFile traffic.
 - CI workflow `runtime-logging-build.yml` that builds and uploads both `IGI-Natives-Debug.dll` and `IGI-Natives-Release.dll` on Windows.

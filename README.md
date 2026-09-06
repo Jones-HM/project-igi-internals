@@ -65,11 +65,19 @@ the retail executable writes at runtime is captured to a trace file.
 1. Build or download `IGI-Natives-Debug.dll` / `IGI-Natives-Release.dll` (see the CI workflow
    `runtime-logging-build.yml`, or `msbuild .\IGI_Natives\IGI_Natives.vcxproj /p:Configuration=Debug /p:Platform=Win32`).
 2. Inject the DLL into retail `IGI.EXE` with any x86 injector (e.g. [IGI-Injector](https://github.com/IGI-Research-Devs/IGI-Injector)).
-3. Watch `<game folder>\IGI-Natives-runtime.log` — every file open, script read, CRT write,
-   debug string and file write made by the game is appended live.
+3. Watch **`<IGI game folder>\IGI-Natives-runtime.log`** — the file is created next to
+   `IGI.EXE` (the folder the DLL is injected into) the first time anything is captured.
+   Every file open, script read, CRT write, debug string and file write made by the game
+   is appended live.
+
+### Hotkey
+- **`Ctrl+L`** — toggles retail-log capture ON/OFF at any time (works at the main menu and
+  in-game). The game HUD shows `Runtime Log ON/OFF`, the transition is recorded in the
+  trace file (`=== capture ENABLED/DISABLED (hotkey) ===`), and the full log path is
+  printed to the console/`IGI-Natives.log`. Capture starts enabled on injection.
 
 ### Environment toggles
-- `IGI_RUNTIME_LOG=0` – disable capturing (hooks stay installed, pass-through detours).
+- `IGI_RUNTIME_LOG=0` – start with capture disabled (Ctrl+L can re-enable it).
 - `IGI_RUNTIME_LOG_VERBOSE=1` – add text/hex previews for CRT-write and WriteFile traffic.
 
 The logger is guarded against capturing its own activity (thread-local `RuntimeLogGuard`), and
