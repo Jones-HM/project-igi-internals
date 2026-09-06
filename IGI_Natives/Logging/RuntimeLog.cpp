@@ -3,6 +3,7 @@
 #define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #include "RuntimeLog.hpp"
 
+#include "../Utils/Utility.hpp"
 #include <cstdarg>
 #include <fstream>
 #include <sstream>
