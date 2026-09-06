@@ -1,0 +1,51 @@
+name: Build IGI-Natives Runtime Logging (Win32)
+
+on:
+  push:
+    branches:
+      - "feature/retail-runtime-logging"
+  pull_request:
+    branches:
+      - "develop"
+      - "master"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.configuration }} | Win32
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build ${{ matrix.configuration }}
+        shell: pwsh
+        run: |
+          $outDir = Join-Path $env:GITHUB_WORKSPACE "artifacts\${{ matrix.configuration }}\"
+          New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+          msbuild .\IGI_Natives\IGI_Natives.vcxproj /m /p:Configuration=${{ matrix.configuration }} /p:Platform=Win32 "/p:OutDir=$outDir"
+
+      - name: Verify DLL produced
+        shell: pwsh
+        run: |
+          $dll = Get-ChildItem -Path (Join-Path $env:GITHUB_WORKSPACE "artifacts") -Recurse -Filter "*.dll" | Select-Object -First 1
+          if (-not $dll) { throw "No DLL was produced for ${{ matrix.configuration }}" }
+          if ($dll.Length -lt 10000) { throw "DLL looks too small: $($dll.FullName) ($($dll.Length) bytes)" }
+          Write-Host "OK: $($dll.FullName) ($($dll.Length) bytes)"
+
+      - name: Upload DLL artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: IGI-Natives-${{ matrix.configuration }}-Win32
+          path: artifacts\${{ matrix.configuration }}\*.dll
+          if-no-files-found: error

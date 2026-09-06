@@ -5,6 +5,7 @@
 #define USE_GTLIBC_LIB
 #define NATIVES_DLL_VERSION std::string("2.7.1")
 #include "DllMain.hpp"
+#include "Logging/RuntimeLog.hpp"
 
 // Include all static libraries for project.
 #if defined(_M_IX86)
@@ -111,6 +112,11 @@ BOOL WINAPI DllMain(HMODULE hModule, DWORD dwReason, LPVOID) {
 				)";
       LOG_RAW(game_font);
       LOG_WARNING("Logger initialized.");
+
+      // Runtime-logging hooks (retail IGI.EXE I/O + Win32 debug output capture).
+      RuntimeLogReadConfig();
+      LOG_WARNING("Runtime logging %s.",
+                  g_RuntimeLogEnabled.load() ? "enabled" : "disabled");
 
       native_instance = std::make_unique<Natives>();
       LOG_WARNING("Natives initialized.");
@@ -245,6 +251,7 @@ bool CleanUpAndExitThread(HMODULE hModule) {
   g_Camera.StopFreeCam();
   FiberPool::Instance().Shutdown();
   FiberPoolEx::Instance().Shutdown();
+  RuntimeLogShutdown();
   g_cleanupDone.store(true);
 
   DEBUG::TEXT_ENABLE(false);

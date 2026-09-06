@@ -1,5 +1,6 @@
 #include "Hook.hpp"
 #include "../HookDetours.hpp"
+#include "../Logging/RuntimeLog.hpp"
 using namespace IGI;
 using namespace IGI;
 
@@ -276,6 +277,30 @@ MH_STATUS Hook::CreateHooks() {
 	mh_status = CreateHook(GameMainLoop, &GameMainLoopDetour, &GameMainLoopOut);
 	if (mh_status != MH_OK && first_error == MH_OK) first_error = mh_status;
 	if (mh_status != MH_OK) LOG_ERROR("GameMainLoop Createhook error : %s", MH_StatusToString(mh_status));
+
+	/**
+	** Retail IGI.EXE runtime-logging hooks.
+	**
+	** GameOpenFile  (0x004A5350) - retail fopen wrapper     -> every file the game opens
+	** GameOpenQFile (0x004B1510) - retail .qsc/.qvm reader  -> every Q-script read
+	** CRT _write    (0x004ABEC7) - static MSVC CRT _write   -> printf-family output
+	** OutputDebugStringA / CreateFileA / WriteFile          -> Win32 debug + file I/O
+	**
+	** All captured traffic lands in <game folder>\IGI-Natives-runtime.log and can be
+	** disabled at any time via the IGI_RUNTIME_LOG=0 environment variable.
+	**/
+
+	mh_status = CreateHook(GameOpenFile, &GameOpenFileDetour, &GameOpenFileOut);
+	if (mh_status != MH_OK && first_error == MH_OK) first_error = mh_status;
+	if (mh_status != MH_OK)LOG_ERROR("GameOpenFile Hooking error : %s", MH_StatusToString(mh_status));
+
+	mh_status = CreateHook(GameOpenQFile, &GameOpenQFileDetour, &GameOpenQFileOut);
+	if (mh_status != MH_OK && first_error == MH_OK) first_error = mh_status;
+	if (mh_status != MH_OK)LOG_ERROR("GameOpenQFile Hooking error : %s", MH_StatusToString(mh_status));
+
+	// CRT _write + Win32 API hooks (OutputDebugStringA / CreateFileA / WriteFile).
+	mh_status = InstallRuntimeLogHooks(this);
+	if (mh_status != MH_OK && first_error == MH_OK) first_error = mh_status;
 
 	return first_error;
 }

@@ -26,6 +26,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added precise file descriptions and the PDB limitation. `igi.pdb` is the official project IGI PDB export artifact and is address-compatible with retail `igi.exe`, but the retail PE has no CodeView/RSDS debug directory, so it cannot be an exact vendor-PDB match in Ghidra.
 - Corrected `Weapon_FireUpdate` and `Weapon_FlameUpdate` to two-argument signatures after resolving the registrar stack pattern. `004D9850` is documented as the no-argument `Qtask_GetEventId` getter; the callback pushed before it belongs to the following registrar call.
 - The reverse-engineering guide is local-only and ignored; committed assets contain the resulting catalog and evidence outputs.
+
+## [Unreleased] - Retail runtime logging hooks (IGI.EXE I/O + debug output capture)
+
+### Added
+- New `Logging/RuntimeLog` module that captures retail IGI.EXE runtime output through MinHook:
+  - Retail static CRT `_write` at `0x004ABEC7` (printf-family / Runtime-Error output).
+  - Retail `fopen` wrapper `GameOpenFile` at `0x004A5350` and Q-script reader `GameOpenQFile` at `0x004B1510` (existing detours enabled).
+  - Win32 APIs `OutputDebugStringA`, `CreateFileA` and `WriteFile` (IAT-safe API hooks).
+- All captured traffic is written to `<game folder>\IGI-Natives-runtime.log` with a 200-line/second rate limiter, a handle→path attribution map for `WriteFile`, and console echo for the rare textual debug outputs.
+- `RuntimeLogGuard` thread-local re-entrancy guard so the I/O hooks never trace the DLL's own file/console activity.
+- Runtime toggles without rebuilding: `IGI_RUNTIME_LOG=0` disables capturing, `IGI_RUNTIME_LOG_VERBOSE=1` adds text/hex previews for CRT-write and WriteFile traffic.
+- CI workflow `runtime-logging-build.yml` that builds and uploads both `IGI-Natives-Debug.dll` and `IGI-Natives-Release.dll` on Windows.
+
 ## [2.7.1] - 2026-08-27
 
 ### Fixed

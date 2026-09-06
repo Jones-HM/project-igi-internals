@@ -142,6 +142,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Utils\Logger.hpp" />
+    <ClInclude Include="Logging\RuntimeLog.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\assets\IGINatives.json">
@@ -166,6 +167,7 @@
     <ClCompile Include="Utils\DbgHelper.cpp" />
     <ClCompile Include="Utils\Logger.cpp" />
     <ClCompile Include="Utils\Utility.cpp" />
+    <ClCompile Include="Logging\RuntimeLog.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

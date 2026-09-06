@@ -12,6 +12,7 @@
 #include "GameResources/GameResource.hpp"
 #include "Graphs/Graph.hpp"
 #include "Utils/FiberPool.hpp"
+#include "Logging/RuntimeLog.hpp"
 
 //Testing.
 bool graph_runner = false;
@@ -592,6 +593,7 @@ void ShowWarningDetour(LPCSTR warn_msg) {
 		ShowWarningOut(warn_msg);
 		return;
 	}
+	RuntimeLogGuard runtime_guard;
 	LOG_FILE("%s warn_msg: %s", "ShowWarning", warn_msg);
 	ShowWarningOut(warn_msg);
 }
@@ -602,6 +604,7 @@ void ShowErrorDetour(LPCSTR err_msg) {
 		ShowErrorOut(err_msg);
 		return;
 	}
+	RuntimeLogGuard runtime_guard;
 	LOG_FILE("%s err_msg: %s", "ShowError", err_msg);
 	ShowErrorOut(err_msg);
 }
@@ -751,17 +754,14 @@ int* __cdecl LoadQVMDetour(LPCSTR file_name) {
 }
 
 FILE* __cdecl GameOpenFileDetour(char* file_name, char* file_mode) {
-	//if (string(file_mode) == "wb")
-	LOG_INFO("%s File : '%s' Mode : '%s'", "OpenFile", file_name, file_mode);
-
-	//ReadWholeFile(file_name, file_mode); 
-	//g_DbgHelper->StackTrace(true, false, true);
-
+	RuntimeLogGuard runtime_guard; // keep the retail I/O hooks from capturing our own logger
+	LOG_FILE("%s File : '%s' Mode : '%s'", "OpenFile", file_name, file_mode);
 	return GameOpenFileOut(file_name, file_mode);
 }
 
 int* __cdecl GameOpenQFileDetour(char* file_name, char* file_mode) {
-	LOG_INFO("%s File : '%s' Mode : '%s'", "OpenQFile", file_name, file_mode);
+	RuntimeLogGuard runtime_guard;
+	LOG_FILE("%s File : '%s' Mode : '%s'", "OpenQFile", file_name, file_mode);
 	return GameOpenQFileOut(file_name, file_mode);
 }
 

@@ -45,6 +45,36 @@ Use the `build_and_reload.bat` batch file for automated building and DLL injecti
 ### 🔧 Manual Building
 Open this project in Visual Studio and build it. Your output will be in **Release/Debug** folder depending on configuration. You'll find `IGI-Natives-Debug.dll` or `IGI-Natives-Release.dll`. Use any **x86(32-bit)** compatible DLL injector or the recommended [IGI-Injector](https://github.com/IGI-Research-Devs/IGI-Injector).
 
+## 📄 Retail Runtime Logging (IGI.EXE I/O + debug output capture)
+
+IGI (2000) does not ship its own logging facility. The retail `IGI.EXE` statically links the
+MSVC CRT (no `msvcrt.dll` import table) and its only debug outlets are a handful of Win32
+imports plus the static CRT output path. This feature hooks those exact surfaces so everything
+the retail executable writes at runtime is captured to a trace file.
+
+| Hook | Retail address | Captures |
+|---|---|---|
+| Static CRT `_write` | `0x004ABEC7` | `printf`/`puts`/`Runtime Error!` output (the game's `printf` path) |
+| `GameOpenFile` | `0x004A5350` | every `fopen`-style file the game opens, with mode |
+| `GameOpenQFile` | `0x004B1510` | every `.qsc`/`.qvm`/script file the game reads |
+| `OutputDebugStringA` | Win32 import | per-process debug strings (any module) |
+| `CreateFileA` | Win32 import | every file handle created, with path + access flags |
+| `WriteFile` | Win32 import | every byte stream written, attributed back to its file path |
+
+### Usage
+1. Build or download `IGI-Natives-Debug.dll` / `IGI-Natives-Release.dll` (see the CI workflow
+   `runtime-logging-build.yml`, or `msbuild .\IGI_Natives\IGI_Natives.vcxproj /p:Configuration=Debug /p:Platform=Win32`).
+2. Inject the DLL into retail `IGI.EXE` with any x86 injector (e.g. [IGI-Injector](https://github.com/IGI-Research-Devs/IGI-Injector)).
+3. Watch `<game folder>\IGI-Natives-runtime.log` — every file open, script read, CRT write,
+   debug string and file write made by the game is appended live.
+
+### Environment toggles
+- `IGI_RUNTIME_LOG=0` – disable capturing (hooks stay installed, pass-through detours).
+- `IGI_RUNTIME_LOG_VERBOSE=1` – add text/hex previews for CRT-write and WriteFile traffic.
+
+The logger is guarded against capturing its own activity (thread-local `RuntimeLogGuard`), and
+the trace stream is rate-limited at 200 lines/second with suppressed-line summaries.
+
 ## 🎮 IGI Debug Keys Integration & Enhanced Features
 
 This DLL seamlessly integrates with IGI's built-in debug functionality while adding powerful enhancement features. See [IGIDebug.md](IGI_Natives/IGIDebug.md) for complete documentation on IGI's native debug keys and activation methods.
